@@ -1,0 +1,1 @@
+### A instância na subnet publica só pode se conectar a instância na subnet privada graças ao security default que estão associada as duas instancias (WEB e DB)
