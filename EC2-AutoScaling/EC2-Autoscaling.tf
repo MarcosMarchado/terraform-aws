@@ -1,4 +1,4 @@
-#target group → aplication load balancer → criar modelo de execução → auto scaling group
+#Target group → Aplication load balancer -> Configurar o listener dentro do LB para apontar para o Target Group → criar modelo de execução → auto scaling group
 data "aws_ami" "debian" {
   most_recent = true
 
