@@ -1,33 +1,44 @@
 ### Requisição do Cliente
-`Navegador → Internet → IGW (Internet Gateway)`
+`Usuário (navegador) → Internet → Internet Gateway (IGW) → Subnet pública (rota 0.0.0.0/0) → ALB/NLB`
 
 >O IGW é o único ponto de entrada/saída para tráfego público em uma VPC (AWS Docs).
 
 ### Roteamento para o ALB/NLB
-`IGW → Tabela de Rotas da Subnet → ALB/NLB`
+`Internet Gateway (IGW) → Subnet pública (rota 0.0.0.0/0) → ALB/NLB`
 
->A tabela de rotas da subnet precisa da rota 0.0.0.0/0 → igw para permitir que o >ALB receba tráfego externo (AWS Docs).
+>A tabela de rotas da subnet precisa conter a rota 0.0.0.0/0 → igw para permitir que o ALB receba tráfego externo. (Fonte: AWS Docs)
 
 ### Distribuição para ECS
-`ALB → Target Group → Tarefa ECS`
+`ALB/NLB → Target Group → Tarefas ECS (em subnets públicas ou privadas)`
 
->O ALB usa o registro no Target Group (não a tabela de rotas) para encontrar as >tarefas ECS (AWS ECS Docs).
+>O ALB utiliza o registro no Target Group (não a tabela de rotas) para encaminhar requisições às tarefas ECS. (Fonte: AWS ECS Docs)
 
 
 ## Esquema
 
 ```mermaid
-sequenceDiagram
-    participant Navegador
-    participant IGW
-    participant TabelaDeRotas
-    participant ALB
-    participant ECS
+    flowchart TD
+        subgraph Requisição do Cliente
+            A[Navegador do Usuário] --> B[Internet]
+            B --> C[Internet Gateway (IGW)]
+            C --> D[Subnet Pública (rota 0.0.0.0/0)]
+            D --> E[ALB/NLB]
+        end
 
-    Navegador->>IGW: Requisição HTTP (Porta 80)
-    IGW->>TabelaDeRotas: "Para onde enviar?"
-    TabelaDeRotas->>ALB: Encaminha para a subnet do ALB (roteamento interno)
-    ALB->>ECS: Distribui para o container (via Target Group)
+        subgraph Distribuição para ECS
+            E --> F[Target Group]
+            F --> G[Tarefas ECS (em subnets públicas ou privadas)]
+        end
+
+    %% Comentários de apoio
+    classDef comment fill=#fff,stroke=none,font-size:12px,color=#666;
+    X1["IGW = ponto de entrada/saída para tráfego público"]:::comment
+    X2["Subnet precisa da rota 0.0.0.0/0 → IGW"]:::comment
+    X3["ALB usa o Target Group, não a tabela de rotas"]:::comment
+
+    X1 -.-> C
+    X2 -.-> D
+    X3 -.-> F
 ```
 
 ## 🔍 Por Que Usamos o DNS do Load Balancer?
