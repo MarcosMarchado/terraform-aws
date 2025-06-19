@@ -17,48 +17,33 @@
 ## Esquema
 
 ```mermaid
-    flowchart TD
-        subgraph Requisição do Cliente
-            A[Navegador do Usuário] --> B[Internet]
-            B --> C[Internet Gateway (IGW)]
-            C --> D[Subnet Pública (rota 0.0.0.0/0)]
-            D --> E[ALB/NLB]
-        end
+flowchart TD
+    %% Requisição do Cliente
+    A[Navegador do Usuário]
+    B[Internet]
+    C[Internet Gateway]
+    D[Subnet Pública - rota 0.0.0.0/0]
+    E[ALB / NLB]
 
-        subgraph Distribuição para ECS
-            E --> F[Target Group]
-            F --> G[Tarefas ECS (em subnets públicas ou privadas)]
-        end
+    %% Distribuição para ECS
+    F[Target Group]
+    G[Tarefas ECS - subnets públicas ou privadas]
 
-    %% Comentários de apoio
-    classDef comment fill=#fff,stroke=none,font-size:12px,color=#666;
-    X1["IGW = ponto de entrada/saída para tráfego público"]:::comment
-    X2["Subnet precisa da rota 0.0.0.0/0 → IGW"]:::comment
-    X3["ALB usa o Target Group, não a tabela de rotas"]:::comment
+    %% Fluxo principal
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    F --> G
 
-    X1 -.-> C
-    X2 -.-> D
-    X3 -.-> F
+    %% Anotações (sem estilização especial)
+    C_note["IGW: ponto de entrada/saída para tráfego público"]
+    D_note["Subnet precisa da rota 0.0.0.0/0 → IGW"]
+    F_note["ALB usa o Target Group, não a tabela de rotas"]
+
+    C_note --- C
+    D_note --- D
+    F_note --- F
+
 ```
-
-## 🔍 Por Que Usamos o DNS do Load Balancer?
-### Abstração de Infraestrutura
-
-O IGW só sabe entregar tráfego para IPs públicos das subnets, mas não para serviços específicos.
-
-O ALB/NLB esconde a complexidade: seu DNS aponta para IPs rotacionados (por trás dele estão as subnets com rotas para o IGW).
-
-### Escalabilidade e Alta Disponibilidade
-
-O DNS do ALB/NLB balanceia automaticamente entre múltiplas subnets públicas (ex: us-east-1a, us-east-1b), enquanto o IGW só enxerga subnets individuais.
-
-### Gerenciamento de Ciclo de Vida
-
-Se você substituir instâncias/containers, o DNS do ALB permanece o mesmo, enquanto os IPs internos mudam.
-```mermaid
-flowchart LR
-    A[Usuário] -- "meu-alb-1234.elb.amazonaws.com" --> B[DNS → IPs Públicos do ALB]
-    B --> C[IGW]
-    C --> D[Tabela de Rotas da Subnet]
-    D --> E[ALB]
-    E --> F[ECS]
