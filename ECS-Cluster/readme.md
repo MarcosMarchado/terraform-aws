@@ -17,33 +17,25 @@
 ## Esquema
 
 ```mermaid
+---
+config:
+  theme: neo
+---
 flowchart TD
-    %% Requisição do Cliente
-    A[Navegador do Usuário]
-    B[Internet]
-    C[Internet Gateway]
-    D[Subnet Pública - rota 0.0.0.0/0]
-    E[ALB / NLB]
-
-    %% Distribuição para ECS
-    F[Target Group]
-    G[Tarefas ECS - subnets públicas ou privadas]
-
-    %% Fluxo principal
-    A --> B
-    B --> C
-    C --> D
-    D --> E
-    E --> F
-    F --> G
-
-    %% Anotações (sem estilização especial)
-    C_note["IGW: ponto de entrada/saída para tráfego público"]
-    D_note["Subnet precisa da rota 0.0.0.0/0 → IGW"]
-    F_note["ALB usa o Target Group, não a tabela de rotas"]
-
-    C_note --- C
-    D_note --- D
-    F_note --- F
-
+    A["Navegador do Usuário"] --> B["Internet"]
+    B --> C["Internet Gateway"]
+    C --> D["Subnet Pública - rota 0.0.0.0/0"]
+    D --> E["ALB / NLB"]
+    E --> F["Target Group"]
+    F --> G["Tarefas ECS - subnets públicas ou privadas"]
+    C_note["IGW: ponto de entrada/saída para tráfego público"] --- C
+    D_note["Subnet precisa da rota 0.0.0.0/0 → IGW"] --- D
+    F_note["ALB usa o Target Group, não a tabela de rotas"] --- F
+     C_note:::Rose
+     C_note:::Peach
+     D_note:::Rose
+     D_note:::Peach
+     F_note:::Peach
+    classDef Rose stroke-width:1px, stroke-dasharray:none, stroke:#FF5978, fill:#FFDFE5, color:#8E2236
+    classDef Peach stroke-width:1px, stroke-dasharray:none, stroke:#FBB35A, fill:#FFEFDB, color:#8F632D
 ```
