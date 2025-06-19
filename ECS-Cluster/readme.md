@@ -16,6 +16,7 @@
 
 ## Esquema
 
+```mermaid
 sequenceDiagram
     participant Navegador
     participant IGW
@@ -27,6 +28,7 @@ sequenceDiagram
     IGW->>TabelaDeRotas: "Para onde enviar?"
     TabelaDeRotas->>ALB: Encaminha para a subnet do ALB (roteamento interno)
     ALB->>ECS: Distribui para o container (via Target Group)
+```
 
 ## 🔍 Por Que Usamos o DNS do Load Balancer?
 ### Abstração de Infraestrutura
@@ -42,7 +44,7 @@ O DNS do ALB/NLB balanceia automaticamente entre múltiplas subnets públicas (e
 ### Gerenciamento de Ciclo de Vida
 
 Se você substituir instâncias/containers, o DNS do ALB permanece o mesmo, enquanto os IPs internos mudam.
-
+```mermaid
 flowchart LR
     A[Usuário] -- "meu-alb-1234.elb.amazonaws.com" --> B[DNS → IPs Públicos do ALB]
     B --> C[IGW]
